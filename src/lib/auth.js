@@ -91,15 +91,24 @@ export async function refreshAccessToken() {
   }
 
   refreshPromise = (async () => {
+    const candidates = [];
+    candidates.push("/auth/refresh");
+    if (API_BASE) {
+      candidates.push(`${API_BASE}/auth/refresh`);
+    }
+
     try {
-      const res = await fetch(`${API_BASE}/auth/refresh`, {
-        method: "POST",
-        credentials: "include"
-      });
-      if (!res.ok) return null;
-      const body = await res.json();
-      const { accessToken } = applyAuthResponse(body);
-      return accessToken ?? null;
+      for (const url of Array.from(new Set(candidates))) {
+        const res = await fetch(url, {
+          method: "POST",
+          credentials: "include"
+        });
+        if (!res.ok) continue;
+        const body = await res.json();
+        const { accessToken } = applyAuthResponse(body);
+        if (accessToken) return accessToken;
+      }
+      return null;
     } catch (err) {
       return null;
     } finally {
