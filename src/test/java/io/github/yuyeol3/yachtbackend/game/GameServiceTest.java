@@ -78,8 +78,8 @@ class GameServiceTest {
 
         when(gameUtil.calculateScore(state.dice(), "ONES")).thenReturn(5);
         when(gameUtil.getTurnLimitMinutes()).thenReturn(3);
-        when(participatedRepository.findByMemberIdAndRoomId(10L, 2L))
-                .thenReturn(Optional.of(new ParticipatedState(2L, "u2", true)));
+//        when(participatedRepository.findByMemberIdAndRoomId(10L, 2L))
+//                .thenReturn(Optional.of(new ParticipatedState(2L, "u2", true)));
 
         GameAction action = new GameAction(MessageType.SELECT_SCORE, 10L, List.of(), "ONES");
 
