@@ -1,5 +1,6 @@
 ﻿import { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import TopBar from "./TopBar.jsx";
 import { apiFetch } from "../lib/api.js";
 import { applyAuthResponse } from "../lib/auth.js";
 
@@ -7,13 +8,20 @@ export default function SignupPage() {
   const navigate = useNavigate();
   const [loginId, setLoginId] = useState("");
   const [password, setPassword] = useState("");
+  const [passwordConfirm, setPasswordConfirm] = useState("");
   const [nickname, setNickname] = useState("");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
+  const passwordMismatch = passwordConfirm.length > 0 && password !== passwordConfirm;
+  const canSubmit = !loading && password.length > 0 && password === passwordConfirm;
 
   const onSubmit = async (e) => {
     e.preventDefault();
     setError("");
+    if (password !== passwordConfirm) {
+      setError("비밀번호가 일치하지 않습니다.");
+      return;
+    }
     setLoading(true);
     try {
       await apiFetch("/users", {
@@ -36,13 +44,7 @@ export default function SignupPage() {
 
   return (
     <div>
-      <div className="top-bar">
-        <div className="brand">
-          <span>Y</span>
-          Yacht Multiplayer
-        </div>
-        <div className="subtle">Create an account</div>
-      </div>
+      <TopBar rightLabel="Create an account" showAccountActions={false} />
       <div className="container">
         <div className="card" style={{ maxWidth: 460, margin: "0 auto" }}>
           <h2>회원가입</h2>
@@ -63,12 +65,20 @@ export default function SignupPage() {
               required
             />
             <input
+              type="password"
+              placeholder="Confirm password"
+              value={passwordConfirm}
+              onChange={(e) => setPasswordConfirm(e.target.value)}
+              required
+            />
+            {passwordMismatch ? <div className="error">비밀번호가 일치하지 않습니다.</div> : null}
+            <input
               placeholder="Nickname"
               value={nickname}
               onChange={(e) => setNickname(e.target.value)}
               required
             />
-            <button className="button primary" type="submit" disabled={loading}>
+            <button className="button primary" type="submit" disabled={!canSubmit}>
               {loading ? "가입 중..." : "Sign Up"}
             </button>
           </form>

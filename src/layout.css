@@ -86,6 +86,12 @@ a {
   white-space: nowrap;
 }
 
+.top-bar-actions {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+}
+
 .container {
   width: min(1180px, 92vw);
   margin: 0 auto;

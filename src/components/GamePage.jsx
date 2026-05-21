@@ -303,7 +303,8 @@ export default function GamePage() {
   useEffect(() => {
     if (!gameState?.turnTimeoutTime) return;
     const update = () => {
-      const target = new Date(gameState.turnTimeoutTime + "+09:00").getTime();
+      const normalizedTime = gameState.turnTimeoutTime.replace(/(\.\d{3})\d+$/, "$1");
+      const target = new Date(`${normalizedTime}Z`).getTime();
       const diff = Math.max(0, target - Date.now());
       const mins = Math.floor(diff / 60000);
       const secs = Math.floor((diff % 60000) / 1000);

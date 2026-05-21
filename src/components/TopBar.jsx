@@ -2,9 +2,9 @@
 import { apiFetch } from "../lib/api.js";
 import { clearAuth, getProfile } from "../lib/auth.js";
 
-export default function TopBar({ subtitle }) {
+export default function TopBar({ subtitle, rightLabel, showAccountActions = true }) {
   const navigate = useNavigate();
-  const profile = getProfile();
+  const profile = showAccountActions ? getProfile() : null;
 
   const logout = async () => {
     try {
@@ -23,11 +23,15 @@ export default function TopBar({ subtitle }) {
         Yacht Multiplayer
         {subtitle ? <span className="page-chip">{subtitle}</span> : null}
       </div>
-      <div style={{ display: "flex", gap: 12, alignItems: "center" }}>
-        <span className="subtle">{profile?.nickname ?? profile?.loginId ?? "Player"}</span>
-        <button className="button ghost" onClick={() => navigate("/lobby")}>Lobby</button>
-        <button className="button primary" onClick={logout}>Logout</button>
-      </div>
+      {showAccountActions ? (
+        <div className="top-bar-actions">
+          <span className="subtle">{profile?.nickname ?? profile?.loginId ?? "Player"}</span>
+          <button className="button ghost" onClick={() => navigate("/lobby")}>Lobby</button>
+          <button className="button primary" onClick={logout}>Logout</button>
+        </div>
+      ) : (
+        <div className="subtle">{rightLabel}</div>
+      )}
     </div>
   );
 }

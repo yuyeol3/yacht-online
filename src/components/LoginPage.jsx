@@ -1,5 +1,6 @@
 ﻿import { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import TopBar from "./TopBar.jsx";
 import { apiFetch } from "../lib/api.js";
 import { applyAuthResponse } from "../lib/auth.js";
 
@@ -30,13 +31,7 @@ export default function LoginPage() {
 
   return (
     <div>
-      <div className="top-bar">
-        <div className="brand">
-          <span>Y</span>
-          Yacht Multiplayer
-        </div>
-        <div className="subtle">Welcome aboard</div>
-      </div>
+      <TopBar rightLabel="Welcome!" showAccountActions={false} />
       <div className="container">
         <div className="card" style={{ maxWidth: 460, margin: "0 auto" }}>
           <h2>로그인</h2>

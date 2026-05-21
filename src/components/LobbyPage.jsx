@@ -110,6 +110,8 @@ export default function LobbyPage() {
                 <div className="subtle">아직 방이 없습니다.</div>
               ) : null}
               {rooms.map((room) => (
+                room.participatedUsers == 0 ?
+                <></> :
                 <div className="card" key={room.id} style={{ padding: 16 }}>
                   <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
                     <div>
@@ -119,7 +121,10 @@ export default function LobbyPage() {
                     <div className="tag">{room.participatedUsers ?? 0} / 4</div>
                   </div>
                   <div className="footer-actions">
-                    <button className="button primary" onClick={() => navigate(`/rooms/${room.id}`, { state: { room } })}>Enter</button>
+                    {room?.status == "PLAYING" ? 
+                      <button className="button">Playing</button> :
+                      <button className="button primary" onClick={() => navigate(`/rooms/${room.id}`, { state: { room } })}>Enter</button>
+                    }
                   </div>
                 </div>
               ))}
