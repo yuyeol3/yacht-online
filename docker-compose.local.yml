@@ -5,17 +5,17 @@ services:
     volumes:
       - mysql-local-data:/var/lib/mysql
     environment:
-      MYSQL_ROOT_PASSWORD: rootpassword
-      MYSQL_DATABASE: database
-      MYSQL_USER: user
-      MYSQL_PASSWORD: password
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD:?MYSQL_ROOT_PASSWORD is required}
+      MYSQL_DATABASE: ${MYSQL_DATABASE:?MYSQL_DATABASE is required}
+      MYSQL_USER: ${DB_USERNAME:?DB_USERNAME is required}
+      MYSQL_PASSWORD: ${DB_PASSWORD:?DB_PASSWORD is required}
     ports:
       - '3311:3306'
     command:
       - --character-set-server=utf8mb4
       - --collation-server=utf8mb4_unicode_ci
     healthcheck:
-      test: ['CMD', 'mysqladmin', 'ping', '-h', 'localhost', '-uuser', '-ppassword']
+      test: ['CMD-SHELL', 'mysqladmin ping -h localhost -u$${MYSQL_USER} -p$${MYSQL_PASSWORD}']
       interval: 5s
       timeout: 3s
       retries: 20
@@ -46,11 +46,12 @@ services:
         condition: service_healthy
     environment:
       SPRING_PROFILES_ACTIVE: dev,game
-      SPRING_DATASOURCE_URL: jdbc:mysql://mysql-db:3306/database
-      SPRING_DATASOURCE_USERNAME: user
-      SPRING_DATASOURCE_PASSWORD: password
+      SPRING_DATASOURCE_URL: jdbc:mysql://mysql-db:3306/${MYSQL_DATABASE:?MYSQL_DATABASE is required}
+      SPRING_DATASOURCE_USERNAME: ${DB_USERNAME:?DB_USERNAME is required}
+      SPRING_DATASOURCE_PASSWORD: ${DB_PASSWORD:?DB_PASSWORD is required}
       SPRING_DATA_REDIS_HOST: redis
       SPRING_DATA_REDIS_PORT: 6379
+      JWT_SECRET: ${JWT_SECRET:?JWT_SECRET is required}
       YACHT_GAME_SERVER_ID: game-1
       YACHT_GAME_SERVER_WS_URL: ws://localhost:8081/api/ws-stomp
     ports:
@@ -68,11 +69,12 @@ services:
         condition: service_healthy
     environment:
       SPRING_PROFILES_ACTIVE: dev,game
-      SPRING_DATASOURCE_URL: jdbc:mysql://mysql-db:3306/database
-      SPRING_DATASOURCE_USERNAME: user
-      SPRING_DATASOURCE_PASSWORD: password
+      SPRING_DATASOURCE_URL: jdbc:mysql://mysql-db:3306/${MYSQL_DATABASE:?MYSQL_DATABASE is required}
+      SPRING_DATASOURCE_USERNAME: ${DB_USERNAME:?DB_USERNAME is required}
+      SPRING_DATASOURCE_PASSWORD: ${DB_PASSWORD:?DB_PASSWORD is required}
       SPRING_DATA_REDIS_HOST: redis
       SPRING_DATA_REDIS_PORT: 6379
+      JWT_SECRET: ${JWT_SECRET:?JWT_SECRET is required}
       YACHT_GAME_SERVER_ID: game-2
       YACHT_GAME_SERVER_WS_URL: ws://localhost:8082/api/ws-stomp
     ports:
@@ -92,12 +94,13 @@ services:
       game-server:
         condition: service_started
     environment:
-      SPRING_PROFILES_ACTIVE: dev,api
-      SPRING_DATASOURCE_URL: jdbc:mysql://mysql-db:3306/database
-      SPRING_DATASOURCE_USERNAME: user
-      SPRING_DATASOURCE_PASSWORD: password
+      SPRING_PROFILES_ACTIVE: dev,api,api-swagger
+      SPRING_DATASOURCE_URL: jdbc:mysql://mysql-db:3306/${MYSQL_DATABASE:?MYSQL_DATABASE is required}
+      SPRING_DATASOURCE_USERNAME: ${DB_USERNAME:?DB_USERNAME is required}
+      SPRING_DATASOURCE_PASSWORD: ${DB_PASSWORD:?DB_PASSWORD is required}
       SPRING_DATA_REDIS_HOST: redis
       SPRING_DATA_REDIS_PORT: 6379
+      JWT_SECRET: ${JWT_SECRET:?JWT_SECRET is required}
     ports:
       - '8080:8080'
 

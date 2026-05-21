@@ -4,9 +4,9 @@ spring:
   profiles:
     active: local-all
     group:
-      local-api: dev, api
+      local-api: dev, api, api-swagger
       local-game: dev, game
-      local-all: dev, all
+      local-all: dev, all, api-swagger
   jpa:
     open-in-view: false
   data:
@@ -47,3 +47,8 @@ yacht:
     heartbeat-ttl-seconds: 30
     heartbeat-interval-ms: 10000
 
+springdoc:
+  api-docs:
+    enabled: false
+  swagger-ui:
+    enabled: false
