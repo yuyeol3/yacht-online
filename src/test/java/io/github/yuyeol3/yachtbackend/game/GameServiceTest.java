@@ -4,8 +4,11 @@ import io.github.yuyeol3.yachtbackend.error.BusinessException;
 import io.github.yuyeol3.yachtbackend.error.ErrorCode;
 import io.github.yuyeol3.yachtbackend.game.dto.GameAction;
 import io.github.yuyeol3.yachtbackend.game.dto.UserScoreBoard;
+import io.github.yuyeol3.yachtbackend.gameroom.GameRoom;
+import io.github.yuyeol3.yachtbackend.gameroom.GameRoomRepository;
 import io.github.yuyeol3.yachtbackend.gameroom.ParticipatedRepository;
 import io.github.yuyeol3.yachtbackend.gameroom.dto.ParticipatedState;
+import io.github.yuyeol3.yachtbackend.server.GameServerRegistryService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -41,6 +44,15 @@ class GameServiceTest {
     @Mock
     private GameTimerService gameTimerService;
 
+    @Mock
+    private GameRoomRepository gameRoomRepository;
+
+    @Mock
+    private GameServerRegistryService gameServerRegistryService;
+
+    @Mock
+    private GameRoom gameRoom;
+
     private GameService gameService;
 
     @BeforeEach
@@ -51,8 +63,13 @@ class GameServiceTest {
                 participatedRepository,
                 gameResultService,
                 gameUtil,
-                gameTimerService
+                gameTimerService,
+                gameRoomRepository,
+                gameServerRegistryService
         );
+        when(gameRoomRepository.findById(10L)).thenReturn(Optional.of(gameRoom));
+        when(gameRoom.getServerId()).thenReturn("local");
+        when(gameServerRegistryService.isCurrentServerOwner(10L, "local")).thenReturn(true);
     }
 
     @Test

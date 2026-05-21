@@ -27,6 +27,9 @@ public class GameRoom extends TimeEntity {
     @Column(name="room_name", nullable = false)
     private String roomName;
 
+    @Column(name = "server_id", nullable = false)
+    private String serverId;
+
     @Version
     private Long version;
 
@@ -34,9 +37,10 @@ public class GameRoom extends TimeEntity {
     @JoinColumn(name = "host_id")
     private User host;
 
-    public GameRoom(User host, String roomName) {
+    public GameRoom(User host, String roomName, String serverId) {
         this.host = host;
         this.roomName = roomName;
+        this.serverId = serverId;
         this.status = GameStatus.WAITING;
     }
 

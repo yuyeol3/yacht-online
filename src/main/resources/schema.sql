@@ -47,6 +47,7 @@ create table if not exists game_rooms(
     id BIGINT auto_increment primary key,
     status varchar(255) not null,
     room_name varchar(255) not null,
+    server_id varchar(255) not null,
     version BIGINT default 0,
     created_at TIMESTAMP not null,
     updated_at TIMESTAMP not null,

@@ -1,6 +1,7 @@
 package io.github.yuyeol3.yachtbackend.game;
 
 import io.github.yuyeol3.yachtbackend.error.BusinessException;
+import io.github.yuyeol3.yachtbackend.config.role.GameServerOnly;
 import io.github.yuyeol3.yachtbackend.game.dto.GameAction;
 import io.github.yuyeol3.yachtbackend.game.dto.SocketResponse;
 import lombok.RequiredArgsConstructor;
@@ -18,6 +19,7 @@ import java.security.Principal;
 @Controller
 @Slf4j
 @RequiredArgsConstructor
+@GameServerOnly
 public class GameController {
 
     private final SimpMessagingTemplate template;

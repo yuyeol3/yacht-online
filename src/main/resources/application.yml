@@ -1,0 +1,49 @@
+spring:
+  application:
+    name: yacht-backend
+  profiles:
+    active: local-all
+    group:
+      local-api: dev, api
+      local-game: dev, game
+      local-all: dev, all
+  jpa:
+    open-in-view: false
+  data:
+    redis:
+      repositories:
+        enabled: false
+  sql:
+    init:
+      mode: never
+  datasource:
+    hikari:
+      maximum-pool-size: 30
+  config:
+    import: optional:file:.env[.properties]
+
+server:
+  servlet:
+    context-path: /api
+
+jwt:
+  expiration: 900
+  refresh_expiration: 86400
+
+game:
+  rule:
+    turn_limit_minutes: 3
+    user_limit_per_room: 4
+
+yacht:
+  server:
+    role: all
+  participation-store: memory
+  game-server:
+    registry:
+      enabled: false
+    id: local
+    ws-url: ws://localhost:8080/api/ws-stomp
+    heartbeat-ttl-seconds: 30
+    heartbeat-interval-ms: 10000
+

@@ -1,6 +1,7 @@
 package io.github.yuyeol3.yachtbackend.auth;
 
 import io.github.yuyeol3.yachtbackend.GenericDataResponse;
+import io.github.yuyeol3.yachtbackend.config.role.ApiServerOnly;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpHeaders;
@@ -11,6 +12,7 @@ import org.springframework.web.bind.annotation.*;
 @RestController
 @RequestMapping("/auth")
 @RequiredArgsConstructor
+@ApiServerOnly
 public class AuthController {
     private final JwtUtil jwtUtil;
     private final AuthService authService;

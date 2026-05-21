@@ -1,0 +1,106 @@
+services:
+  mysql-db:
+    image: mysql:8.0
+    container_name: yacht-local-mysql
+    volumes:
+      - mysql-local-data:/var/lib/mysql
+    environment:
+      MYSQL_ROOT_PASSWORD: rootpassword
+      MYSQL_DATABASE: database
+      MYSQL_USER: user
+      MYSQL_PASSWORD: password
+    ports:
+      - '3311:3306'
+    command:
+      - --character-set-server=utf8mb4
+      - --collation-server=utf8mb4_unicode_ci
+    healthcheck:
+      test: ['CMD', 'mysqladmin', 'ping', '-h', 'localhost', '-uuser', '-ppassword']
+      interval: 5s
+      timeout: 3s
+      retries: 20
+
+  redis:
+    image: redis:7.2
+    container_name: yacht-local-redis
+    ports:
+      - '6379:6379'
+    command: redis-server --appendonly yes
+    volumes:
+      - redis-local-data:/data
+    healthcheck:
+      test: ['CMD', 'redis-cli', 'ping']
+      interval: 5s
+      timeout: 3s
+      retries: 20
+
+  game-server:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: yacht-local-game-server
+    depends_on:
+      mysql-db:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    environment:
+      SPRING_PROFILES_ACTIVE: dev,game
+      SPRING_DATASOURCE_URL: jdbc:mysql://mysql-db:3306/database
+      SPRING_DATASOURCE_USERNAME: user
+      SPRING_DATASOURCE_PASSWORD: password
+      SPRING_DATA_REDIS_HOST: redis
+      SPRING_DATA_REDIS_PORT: 6379
+      YACHT_GAME_SERVER_ID: game-1
+      YACHT_GAME_SERVER_WS_URL: ws://localhost:8081/api/ws-stomp
+    ports:
+      - '8081:8080'
+
+  game-server-2:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: yacht-local-game-server-2
+    depends_on:
+      mysql-db:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    environment:
+      SPRING_PROFILES_ACTIVE: dev,game
+      SPRING_DATASOURCE_URL: jdbc:mysql://mysql-db:3306/database
+      SPRING_DATASOURCE_USERNAME: user
+      SPRING_DATASOURCE_PASSWORD: password
+      SPRING_DATA_REDIS_HOST: redis
+      SPRING_DATA_REDIS_PORT: 6379
+      YACHT_GAME_SERVER_ID: game-2
+      YACHT_GAME_SERVER_WS_URL: ws://localhost:8082/api/ws-stomp
+    ports:
+      - '8082:8080'
+
+
+  api-server:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: yacht-local-api-server
+    depends_on:
+      mysql-db:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      game-server:
+        condition: service_started
+    environment:
+      SPRING_PROFILES_ACTIVE: dev,api
+      SPRING_DATASOURCE_URL: jdbc:mysql://mysql-db:3306/database
+      SPRING_DATASOURCE_USERNAME: user
+      SPRING_DATASOURCE_PASSWORD: password
+      SPRING_DATA_REDIS_HOST: redis
+      SPRING_DATA_REDIS_PORT: 6379
+    ports:
+      - '8080:8080'
+
+volumes:
+  mysql-local-data:
+  redis-local-data:

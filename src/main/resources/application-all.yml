@@ -1,0 +1,16 @@
+spring:
+  data:
+    redis:
+      host: localhost
+      port: 6379
+  sql:
+    init:
+      mode: always
+
+yacht:
+  server:
+    role: all
+  participation-store: redis
+  game-server:
+    registry:
+      enabled: true

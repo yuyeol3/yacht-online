@@ -1,6 +1,7 @@
 package io.github.yuyeol3.yachtbackend.user;
 
 import io.github.yuyeol3.yachtbackend.GenericDataResponse;
+import io.github.yuyeol3.yachtbackend.config.role.ApiServerOnly;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotBlank;
 import lombok.RequiredArgsConstructor;
@@ -14,6 +15,7 @@ import org.springframework.web.bind.annotation.*;
 @RestController
 @RequestMapping("/users")
 @RequiredArgsConstructor
+@ApiServerOnly
 public class UserController {
 
     private final UserService userService;
