@@ -4,6 +4,8 @@ import io.github.yuyeol3.yachtbackend.game.dto.PlayedResponse;
 import io.github.yuyeol3.yachtbackend.game.dto.UserScoreBoard;
 import lombok.Builder;
 
+import java.time.Duration;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
@@ -21,7 +23,13 @@ public record GameState(
         List<Integer> dice,
         List<Boolean> kept,
         Map<Long, UserScoreBoard> scores,
-        List<PlayedResponse> playedResults
+        List<PlayedResponse> playedResults,
+        Long leftMillis
 ) {
-
+    public GameState {
+        if (turnTimeoutTime == null)
+            leftMillis = 0L;
+        else
+            leftMillis = Duration.between(LocalDateTime.now(), turnTimeoutTime).toMillis();
+    }
 }

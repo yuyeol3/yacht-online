@@ -20,15 +20,27 @@
 
 ## 실행 방법
 
-### 1) DB 실행 (Docker)
+### 1) 환경 변수 설정
+
+`.env.example`을 참고해서 로컬 전용 `.env`를 만듭니다. `.env`는 Git에 커밋하지 않습니다.
+
+```properties
+MYSQL_ROOT_PASSWORD=...
+MYSQL_DATABASE=database
+DB_USERNAME=...
+DB_PASSWORD=...
+JWT_SECRET=...
+```
+
+### 2) DB/Redis 실행 (Docker)
 
 ```bash
 docker compose up -d
 ```
 
-기본 설정은 `localhost:3311`, DB 이름 `database`, 계정 `user/password`입니다.
+`docker-compose.yml`은 개발용 MySQL/Redis만 실행합니다.
 
-### 2) 애플리케이션 실행
+### 3) 애플리케이션 실행
 
 ```bash
 ./gradlew bootRun
@@ -40,25 +52,64 @@ Windows:
 gradlew.bat bootRun
 ```
 
-기본 프로필은 `dev`, 컨텍스트 패스는 `/api`입니다.
+기본 프로필은 `local-all`, 컨텍스트 패스는 `/api`입니다.
+
+### 4) API 서버 + 게임 서버 로컬 통합 실행
+
+```bash
+./gradlew bootJar
+docker compose -f docker-compose.local.yml up --build
+```
+
+Windows:
+
+```bash
+gradlew.bat bootJar
+docker compose -f docker-compose.local.yml up --build
+```
+
+로컬 통합 실행 포트:
+
+- API 서버: `http://localhost:8080/api`
+- 게임 서버 1: `ws://localhost:8081/api/ws-stomp`
+- 게임 서버 2: `ws://localhost:8082/api/ws-stomp`
+- MySQL: `localhost:3311`
+- Redis: `localhost:6379`
 
 ## 설정 값
 
-`src/main/resources/application.properties`
+`src/main/resources/application.yml`
 
-- `spring.profiles.active=dev`
+- `spring.profiles.active=local-all`
 - `server.servlet.context-path=/api`
 - `jwt.expiration=900` (액세스 토큰 만료, 초)
 - `jwt.refresh_expiration=86400` (리프레시 토큰 만료, 초)
 - `game.rule.turn_limit_minutes=3`
 - `game.rule.user_limit_per_room=4`
 
-`src/main/resources/application-dev.properties`
+`src/main/resources/application-dev.yml`
 
 - MySQL 접속 정보
-- `jwt.secret`
+- `jwt.secret`은 `JWT_SECRET` 환경 변수에서 주입
 
-보안상 실제 배포/공개 저장소에서는 `jwt.secret`을 환경 변수로 분리하는 것을 권장합니다.
+프로필 파일:
+
+- `application-dev.yml`: 로컬 DB/JWT 설정
+- `application-api.yml`: API 서버 역할
+- `application-game.yml`: 게임 서버 역할
+- `application-all.yml`: 단일 서버 로컬 실행 역할
+- `application-api-swagger.yml`: API 개발 Swagger 활성화
+
+Swagger는 `local-api` 프로필에서만 활성화됩니다.
+
+```bash
+./gradlew bootRun --args="--spring.profiles.active=local-api"
+```
+
+```text
+http://localhost:8080/api/swagger-ui
+http://localhost:8080/api/v3/api-docs
+```
 
 ## API 요약
 
@@ -86,7 +137,7 @@ Base URL: `http://localhost:8080/api`
 
 ## WebSocket(STOMP) 요약
 
-- 연결 엔드포인트: `/api/ws-stomp` (SockJS)
+- 연결 엔드포인트: 방 생성/조회 응답의 `gameServer.wsUrl` (SockJS)
 - 헤더: `Authorization: Bearer {accessToken}`
 - 발행 prefix: `/pub`
 - 구독 prefix: `/sub`, 개인 에러 큐 `/user/queue/errors`
