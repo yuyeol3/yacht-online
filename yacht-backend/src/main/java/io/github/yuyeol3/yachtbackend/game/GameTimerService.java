@@ -2,6 +2,7 @@ package io.github.yuyeol3.yachtbackend.game;
 
 import io.github.yuyeol3.yachtbackend.game.dto.SocketResponse;
 import io.github.yuyeol3.yachtbackend.game.dto.UserScoreBoard;
+import io.github.yuyeol3.yachtbackend.config.role.GameServerOnly;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
@@ -18,6 +19,7 @@ import java.util.function.Function;
 @Service
 @Slf4j
 @RequiredArgsConstructor
+@GameServerOnly
 public class GameTimerService {
     private final GameStateRepository gameStateRepository;
     private final TaskScheduler taskScheduler;

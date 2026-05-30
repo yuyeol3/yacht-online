@@ -3,9 +3,10 @@ package io.github.yuyeol3.yachtbackend.config;
 import io.github.yuyeol3.yachtbackend.error.BusinessException;
 import io.github.yuyeol3.yachtbackend.game.MessageType;
 import io.github.yuyeol3.yachtbackend.game.dto.SocketResponse;
-import io.github.yuyeol3.yachtbackend.gameroom.GameRoomService;
 import io.github.yuyeol3.yachtbackend.gameroom.ParticipatedRepository;
+import io.github.yuyeol3.yachtbackend.gameroom.RoomSessionService;
 import io.github.yuyeol3.yachtbackend.gameroom.dto.GameRoomEnterQuit;
+import io.github.yuyeol3.yachtbackend.config.role.GameServerOnly;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.event.EventListener;
@@ -17,11 +18,12 @@ import org.springframework.web.socket.messaging.SessionDisconnectEvent;
 @Slf4j
 @Component
 @RequiredArgsConstructor
+@GameServerOnly
 public class WebSocketEventListener {
 
     private final SimpMessagingTemplate template;
     private final ParticipatedRepository participatedRepository;
-    private final GameRoomService gameRoomService;
+    private final RoomSessionService roomSessionService;
 
     @EventListener
     public void handleWebSocketDisconnectListener(SessionDisconnectEvent event) {
@@ -31,11 +33,11 @@ public class WebSocketEventListener {
             Long userId = Long.parseLong(accessor.getUser().getName());
             Long roomId = participatedRepository.findRoomIdByUserId(userId);
 
-            if (roomId != null) {
+            if (roomId != null && participatedRepository.findByMemberIdAndRoomId(roomId, userId).isPresent()) {
                 // 강제퇴장 처리
-
                 try {
-                    GameRoomEnterQuit result = gameRoomService.removeParticipant(roomId, userId);
+
+                    GameRoomEnterQuit result = roomSessionService.removeParticipant(roomId, userId);
 
                     template.convertAndSend("/sub/rooms/" + roomId,
                             new SocketResponse<>(MessageType.QUIT, result)

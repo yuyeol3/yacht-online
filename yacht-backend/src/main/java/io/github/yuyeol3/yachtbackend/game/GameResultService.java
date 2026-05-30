@@ -1,5 +1,6 @@
 package io.github.yuyeol3.yachtbackend.game;
 
+import io.github.yuyeol3.yachtbackend.config.role.GameServerOnly;
 import io.github.yuyeol3.yachtbackend.game.dto.PlayedResponse;
 import io.github.yuyeol3.yachtbackend.gameroom.GameRoom;
 import io.github.yuyeol3.yachtbackend.gameroom.GameRoomRepository;
@@ -18,6 +19,7 @@ import java.util.List;
 import java.util.Optional;
 
 @Service
+@GameServerOnly
 @RequiredArgsConstructor
 @Transactional(readOnly = true)
 public class GameResultService {

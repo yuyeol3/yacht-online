@@ -2,29 +2,26 @@ package io.github.yuyeol3.yachtbackend.game;
 
 import io.github.yuyeol3.yachtbackend.error.BusinessException;
 import io.github.yuyeol3.yachtbackend.error.ErrorCode;
+import io.github.yuyeol3.yachtbackend.config.role.GameServerOnly;
 import io.github.yuyeol3.yachtbackend.game.dto.GameAction;
-import io.github.yuyeol3.yachtbackend.game.dto.SocketResponse;
 import io.github.yuyeol3.yachtbackend.game.dto.UserScoreBoard;
+import io.github.yuyeol3.yachtbackend.gameroom.GameRoom;
 import io.github.yuyeol3.yachtbackend.gameroom.GameRoomRepository;
-import io.github.yuyeol3.yachtbackend.gameroom.GameRoomService;
 import io.github.yuyeol3.yachtbackend.gameroom.ParticipatedRepository;
+import io.github.yuyeol3.yachtbackend.server.GameServerRegistryService;
 import lombok.RequiredArgsConstructor;
-import org.springframework.messaging.simp.SimpMessagingTemplate;
-import org.springframework.scheduling.TaskScheduler;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.time.Instant;
 import java.time.LocalDateTime;
-import java.time.temporal.ChronoUnit;
 import java.util.*;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ScheduledFuture;
+import java.util.concurrent.ThreadLocalRandom;
 import java.util.function.Function;
 
 @Service
 @RequiredArgsConstructor
 @Transactional(readOnly = true)
+@GameServerOnly
 public class GameService {
 
     private final GameStateRepository gameStateRepository;
@@ -32,6 +29,8 @@ public class GameService {
     private final GameResultService gameResultService;
     private final GameUtil gameUtil;
     private final GameTimerService gameTimerService;
+    private final GameRoomRepository gameRoomRepository;
+    private final GameServerRegistryService gameServerRegistryService;
 
     public Function<GameTimerService.FuncArgs, GameState> getTimerTask() {
         return t
@@ -44,6 +43,7 @@ public class GameService {
 
     @Transactional
     public GameState processAction(Long roomId, Long userId, GameAction action) {
+        assertCurrentServerOwns(roomId);
         GameState state = gameStateRepository.update(roomId, currentState-> {
             if (!currentState.curTurnUserId().equals(userId)) {
                 throw new BusinessException(ErrorCode.NOT_YOUR_TURN);
@@ -101,8 +101,11 @@ public class GameService {
 
         for (int i = 0; i < 5; i++) {
             if (!state.kept().get(i))
-                newDice.set(i, (int) (Math.random() * 6) + 1);
+                newDice.set(i, ThreadLocalRandom.current().nextInt(1, 7));
+//                newDice.set(i, (int) (Math.random() * 6) + 1);
+
         }
+
 
         return state.toBuilder()
                 .dice(List.copyOf(newDice))
@@ -158,6 +161,14 @@ public class GameService {
     public void abortGame(Long roomId) {
         gameTimerService.cancelTimer(roomId);
         gameStateRepository.remove(roomId);
+    }
+
+    private void assertCurrentServerOwns(Long roomId) {
+        GameRoom gameRoom = gameRoomRepository.findById(roomId)
+                .orElseThrow(() -> new BusinessException(ErrorCode.NOT_FOUND));
+        if (!gameServerRegistryService.isCurrentServerOwner(roomId, gameRoom.getServerId())) {
+            throw new BusinessException(ErrorCode.UNAUTHORIZED);
+        }
     }
 
 
