@@ -1,5 +1,6 @@
 package io.github.yuyeol3.yachtbackend.gameroom;
 
+import io.github.yuyeol3.yachtbackend.config.role.ApiServerOnly;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.scheduling.annotation.Scheduled;
@@ -10,6 +11,7 @@ import java.util.List;
 @Slf4j
 @Component
 @RequiredArgsConstructor
+@ApiServerOnly
 public class RoomCleanupScheduler {
 
     private final RoomCleanupService roomCleanupService;
