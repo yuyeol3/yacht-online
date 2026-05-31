@@ -8,6 +8,7 @@ import io.github.yuyeol3.yachtbackend.game.dto.UserScoreBoard;
 import io.github.yuyeol3.yachtbackend.gameroom.GameRoom;
 import io.github.yuyeol3.yachtbackend.gameroom.GameRoomRepository;
 import io.github.yuyeol3.yachtbackend.gameroom.ParticipatedRepository;
+import io.github.yuyeol3.yachtbackend.gameroom.dto.ParticipatedState;
 import io.github.yuyeol3.yachtbackend.server.GameServerRegistryService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -17,6 +18,7 @@ import java.time.LocalDateTime;
 import java.util.*;
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.function.Function;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -141,8 +143,52 @@ public class GameService {
                     .build();
         }
         newScores.put(userId, newBoard);
-        int nextTurn = (state.turn() + 1) % state.turnList().size();
-        int nextRound = nextTurn == 0 ? state.round() + 1 : state.round();
+
+        Set<Long> currentParticipantIds = participatedRepository
+                .findMembersByRoomId(state.roomId())
+                .stream()
+                .map(ParticipatedState::userId)
+                .collect(Collectors.toSet());
+
+        int nextTurn = state.turn();
+        int nextRound = state.round();
+
+        if (!currentParticipantIds.isEmpty()) {
+            int maxIter = state.turnList().size();
+
+            for (int i = 0; i < maxIter; i++) {
+                nextTurn = (nextTurn + 1) % state.turnList().size();
+                nextRound = nextTurn == 0 ? nextRound + 1: nextRound;
+                Long nextUserId = state.turnList().get(nextTurn);
+                if (currentParticipantIds.contains(nextUserId)) {
+                    break;
+                }
+            }
+        }
+
+//        while (true) {
+//            nextTurn = (nextTurn + 1) % state.turnList().size();
+//            nextRound = nextTurn == 0 ? nextRound + 1 : nextRound;
+//            Long nextUserId = state.turnList().get(nextTurn);
+//
+//            if (
+//                    participatedRepository
+//                            .findMembersByRoomId(state.roomId()).isEmpty() ||
+//                    participatedRepository
+//                            .findMembersByRoomId(state.roomId())
+//                            .stream()
+//                            .map(ParticipatedState::userId)
+//                            .toList()
+//                            .contains(nextUserId)
+//            ) {
+//                break;
+//            }
+//
+//
+////            int nextTurn = (state.turn() + 1) % state.turnList().size();
+////            int nextRound = nextTurn == 0 ? state.round() + 1 : state.round();
+//        }
+
 
 
         return state.toBuilder()
