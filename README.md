@@ -159,7 +159,7 @@ Game 서버는 Spring Boot WebSocket 기반으로 구현되었으며, 실시간 
 
 #### AWS RDS MySQL
 
-AWS RDS MySQL은 사용자 계정 정보, 게임 룸 정보, 게임 결과, 누적 점수 및 랭킹 데이터를 저장합니다. 기존 로컬 개발 환경에서 사용하던 `schema.sql`을 기반으로 RDS에 핵심 테이블을 생성했습니다.
+AWS RDS MySQL은 사용자 계정 정보, 게임 룸 정보, 게임 결과, 누적 점수를 저장합니다. 기존 로컬 개발 환경에서 사용하던 `schema.sql`을 기반으로 RDS에 핵심 테이블을 생성했습니다.
 
 주요 테이블은 다음과 같습니다.
 
@@ -284,12 +284,12 @@ yacht-online/
 │   ├── APIS.md                     # 클라이언트-서버 간 API 연동 명세
 │   ├── package.json                # 프론트엔드 패키지 의존성 명세
 │   └── vite.config.js              # Vite 프레임워크 빌드 설정
-└── yacht-backend/                  # Spring Boot 기반 백엔드 (API/Game 통합 모듈)
+└── yacht-backend/                  # Spring Boot 기반 백엔드 
     ├── src/main/java/.../yachtbackend/
     │   ├── auth/                   # JWT 토큰 발급 및 필터 인증 로직
-    │   ├── config/                 # Security, WebSocket 설정 및 서버 Role 분리
+    │   ├── config/                 # Security, WebSocket, 서버 Role 설정
     │   ├── game/                   # 요트 다이스 규칙 및 타이머 처리
-    │   ├── gameroom/               # 대기방 로비 API 및 게임 방 내부 STOMP 컨트롤러
+    │   ├── gameroom/               # 대기방 로비 API 및 게임 방 STOMP 컨트롤러
     │   ├── server/                 # Redis 기반의 게임 서버 레지스트리 
     │   └── user/                   # 사용자 계정 관리 및 DB 연동
     ├── src/main/resources/
@@ -308,7 +308,35 @@ yacht-online/
 ---
 
 ## G. 개발 결과물을 사용하는 방법 소개
-### 0. 게임 페이지 사용 예
+### 0. 게임 페이지 사용법
+
+회원가입 페이지를 통해 계정을 생성할 수 있습니다.
+![회원가입](./docs/images/use-example-sign-up.png)
+
+계정이 존재한다면 아이디와 비밀번호를 입력해 로그인합니다.
+![로그인](./docs/images/use-example-login.png)
+
+로비 화면에서는 방을 새로 생성하거나, 이미 생성되어 있는 게임방에 접속할 수 있습니다.
+![로비](./docs/images/use-example-lobby.png)
+
+게임방에 접속하면 ready 버튼을 눌러 준비되었음을 표시하거나, 방을 나갈 수 있습니다. 방장이라면 모든 참가자가 ready일 때 게임 시작 버튼을 통해 게임을 시작할 수 있습니다.
+![게임방](./docs/images/use-example-gameroom.png)
+
+방장이 게임 시작 버튼을 누르면 게임이 시작됩니다. 왼쪽에는 누구의 턴인지 표시되며 남은 시간과 남은 주사위 굴림 횟수가 표시됩니다. Roll 버튼을 클릭하면 주사위를 굴릴 수 있습니다. 회면 오른쪽에는 점수판이 표시되며 현재 주사위 상태에 따라 얻을 수 있는 점수가 표시됩니다.
+
+![게임](./docs/images/use-example-in-game.png)
+
+원할 경우 주사위를 고정하여 일부 주사위만 굴릴 수 있습니다. 족보를 맞추기 위해 이를 전략적으로 사용할 수 있습니다.
+
+![주사위 고정](./docs/images/use-example-dice-fix.png)
+
+주사위를 굴리면 다음과 같이 애니메이션이 표시됩니다
+
+![주사위 굴림](./docs/images/use-example-dice-roll.png)
+
+게임이 종료되면 순위가 표시됩니다. 한 판 더 하기 버튼을 누르면 대기실로 이동하며, 나가기 버튼을 누르면 방에서 나갈 수 있습니다.
+
+![게임 끝](./docs/images/use-example-game-over.png)
 
 
 ### 1. 동작 환경
@@ -372,8 +400,6 @@ GAME_SERVER_PORT=8081
 SPRING_PROFILES_ACTIVE=prod
 ```
 
-실제 제출 시에는 보안상 민감한 값이 포함된 `.env` 파일을 GitHub에 업로드하지 않습니다. 대신 `.env.example` 파일을 제공하여 필요한 환경 변수 목록만 안내합니다.
-
 ---
 
 ### 4. Docker Compose로 서버 실행
@@ -404,7 +430,13 @@ docker compose down
 
 ### 5. 프론트엔드 배포
 
-프론트엔드는 빌드 후 S3 버킷에 업로드하여 정적 웹 사이트로 배포합니다.
+로컬에서 테스트할 경우 다음과 같은 명령어를 실행합니다. 실행하기 전에 dev 실행 port를 5174로 설정해 주세요.
+
+```bash
+npm run dev
+```
+
+배포의 경우, 빌드 후 S3 버킷에 업로드하여 정적 웹 사이트로 제공하면 됩니다.
 
 ```bash
 cd yacht-frontend
@@ -417,8 +449,6 @@ npm run build
 ```bash
 aws s3 sync dist/ s3://[S3 버킷 이름] --delete
 ```
-
-프론트엔드 빌드 디렉터리 이름은 사용하는 프레임워크에 따라 `dist` 또는 `build`로 달라질 수 있습니다.
 
 ---
 
@@ -433,7 +463,7 @@ https://[서비스 도메인]
 로컬 테스트 환경에서는 다음 주소를 사용할 수 있습니다.
 
 ```text
-http://localhost
+http://localhost:5174
 ```
 
 ---
@@ -451,31 +481,6 @@ http://localhost
 9. 제한 시간 3분을 초과하면 서버가 자동으로 다음 턴으로 전환합니다.
 10. 모든 턴이 종료되면 최종 점수가 계산되고, 결과가 RDS에 저장됩니다.
 11. 사용자는 최종 결과와 랭킹을 확인할 수 있습니다.
-
----
-
-
-### 8. 주요 API 및 WebSocket 경로
-
-#### REST API 예시
-
-| 기능         | Method | URL                |
-| ---------- | ------ | ------------------ |
-| 회원가입       | POST   | `/api/auth/signup` |
-| 로그인        | POST   | `/api/auth/login`  |
-| 게임 룸 목록 조회 | GET    | `/api/rooms`       |
-| 게임 룸 생성    | POST   | `/api/rooms`       |
-| 랭킹 조회      | GET    | `/api/rankings`    |
-
-#### WebSocket 예시
-
-| 기능           | 경로                         |
-| ------------ | -------------------------- |
-| WebSocket 연결 | `/ws`                      |
-| 게임 룸 구독      | `/topic/rooms/{roomId}`    |
-| 게임 액션 전송     | `/app/rooms/{roomId}/game` |
-
-실제 경로는 구현 코드 기준으로 수정해야 합니다.
 
 ---
 
@@ -539,38 +544,4 @@ AI는 주로 다음 작업에 활용했습니다.
 
 전체 코드 중 AI의 제안을 참고하여 작성하거나 수정한 비율은 약 40%입니다.
 단, 프로젝트의 핵심 구조 결정, 최종 코드 작성, 기능 검증, 배포 확인은 팀원이 직접 수행했습니다. AI가 제안한 내용은 그대로 사용하지 않고, 프로젝트 요구사항과 실제 실행 결과에 맞게 수정 및 검증한 뒤 반영했습니다.
-
-## 실행 화면 및 데모
-
-### 1. 메인 화면
-
-```md
-![메인 화면](./docs/images/main.png)
-```
-
-### 2. 로그인 화면
-
-```md
-![로그인 화면](./docs/images/login.png)
-```
-
-### 3. 게임 룸 화면
-
-```md
-![게임 룸 화면](./docs/images/room.png)
-```
-
-### 4. 게임 진행 화면
-
-```md
-![게임 진행 화면](./docs/images/game.png)
-```
-
-### 5. 랭킹 화면
-
-```md
-![랭킹 화면](./docs/images/ranking.png)
-```
-
----
 
