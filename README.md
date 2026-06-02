@@ -383,21 +383,11 @@ cp .env.example .env
 예시:
 
 ```env
-MYSQL_HOST=[RDS 엔드포인트]
-MYSQL_PORT=3306
-MYSQL_DATABASE=yacht
-MYSQL_USER=[DB 사용자명]
-MYSQL_PASSWORD=[DB 비밀번호]
-
-REDIS_HOST=[Redis 서버 주소]
-REDIS_PORT=6379
-
-JWT_SECRET=[JWT_SECRET_KEY]
-
-API_SERVER_PORT=8080
-GAME_SERVER_PORT=8081
-
-SPRING_PROFILES_ACTIVE=prod
+MYSQL_ROOT_PASSWORD=change-me-root-password
+MYSQL_DATABASE=database
+DB_USERNAME=change-me-db-user
+DB_PASSWORD=change-me-db-password
+JWT_SECRET=change-me-at-least-32-characters-long
 ```
 
 ---
