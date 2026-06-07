@@ -305,6 +305,29 @@ yacht-online/
 
 
 ---
+### 6. AWS 배포 환경
+
+EC2
+- <img width="2850" height="780" alt="image" src="https://github.com/user-attachments/assets/c84286c8-fa56-4653-8100-ac99313831dc" />
+- API 서버 1대와 Game 서버 2대를 EC2 인스턴스로 분리하여 운영하였습니다.
+
+ALB
+- <img width="2879" height="536" alt="image" src="https://github.com/user-attachments/assets/94cf9fcc-cb26-4a5c-9f7f-8496906b43f2" />
+- <img width="2848" height="1304" alt="image" src="https://github.com/user-attachments/assets/3a6921bf-827d-4826-8af1-29fef055a1c8" />
+- <img width="2854" height="1292" alt="image" src="https://github.com/user-attachments/assets/65a031b1-0aa2-493c-8a34-c193d8e4db7e" />
+- <img width="2843" height="1387" alt="image" src="https://github.com/user-attachments/assets/afa0a641-a2cb-43f3-aa9f-0e1284a87f61" />
+- ALB를 통해 API 및 Websocket 요청을 백엔드 서버로 전달하였습니다.
+
+RDS
+- <img width="2865" height="520" alt="image" src="https://github.com/user-attachments/assets/bda0a820-99d2-4b94-b6bb-fd6376a8f0d4" />
+- 사용자 및 게임 데이터를 저장하기 위해 RDS MySQL을 사용하였습니다.
+
+실제 서비스
+- <img width="2879" height="1218" alt="image" src="https://github.com/user-attachments/assets/1869de8c-ee5c-4924-a36e-9370ab76bfd8" />
+- HTTPS 환경에서 실제 서비스가 운영되고 있습니다.
+
+
+---
 
 ## G. 개발 결과물을 사용하는 방법 소개
 ### 0. 게임 페이지 사용법
